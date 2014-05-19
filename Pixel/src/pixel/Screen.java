@@ -33,6 +33,14 @@ public class Screen {
 			throw new RuntimeException("Screen-Size can't go beyound your Display-Size");
 		}
 	}
+	
+	public int getWidth(){
+		return screenW0;
+	}
+	
+	public int getHeight(){
+		return screenH0;
+	}
 
 	public void drawPixel(int x, int y, int colour) {
 		if (x > -1 && x < screenW0 && y > -1 && y < screenH0) {
@@ -202,5 +210,45 @@ public class Screen {
 		}
 	}
 
+	/*
+	 * Experimental... top and bottom must be equal in size
+	 */
+	public void drawDualLayerSprite(int x, int y, Sprite top, Sprite bottom) {
+
+		int sX = 0;
+		int sY = 0;
+		int sW = top.getWidth();
+		int sH = top.getHeight();
+
+		// Evaluate x and width
+		if (x < 0) {
+			sX -= x;
+			x = 0;
+		} else if (x + sW > screenW1) {
+			sW += screenW1 - (x + sW);
+		}
+
+		// Evaluate y and height
+		if (y < 0) {
+			sY -= y;
+			y = 0;
+		} else if (y + sH > screenH1) {
+			sH += screenH1 - (y + sH);
+		}
+
+		x += screenX;
+		y += screenY;
+		int tempColour = 0;
+		for (int yy = sY; yy < sH; yy++, y++) {
+			for (int xx = sX, tX = x; xx < sW; xx++, tX++) {
+				tempColour = top.getColour(xx, yy);
+				if (tempColour != top.getTransparentColour()) {
+					pixels[tX + y * displayWidth] = tempColour;
+				}else{
+					pixels[tX + y * displayWidth] = bottom.getColour(xx, yy);
+				}
+			}
+		}
+	}
 
 }

@@ -13,7 +13,7 @@ public class Font {
 		this.height = sheet.getHeight();
 		sprites = new Sprite[length];
 		for(int i = 0; i<length;i++){
-			sprites[i] = sheet.createSprite("" + characters.charAt(i), i*width, 0, width, height, 0xFFFFFF);
+			sprites[i] = sheet.createSprite("" + characters.charAt(i), i*width, 0, width, height, 0xFF00FF);
 		}
 	}
 	
@@ -26,7 +26,6 @@ public class Font {
 	}
 	
 	public String getCharacters(){
-		
 		return characters;
 	}
 	

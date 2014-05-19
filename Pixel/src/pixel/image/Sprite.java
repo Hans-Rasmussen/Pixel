@@ -15,6 +15,7 @@ public class Sprite {
 		this.tColour = tColour;
 	}
 	
+	@Override
 	public String toString(){
 		return "SPRITE[name='" + name + "', width='" + width + "', height='" + height+"']";
 	}

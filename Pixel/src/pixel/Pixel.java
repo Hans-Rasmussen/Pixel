@@ -10,6 +10,9 @@ import java.awt.image.BufferStrategy;
 
 import javax.swing.JFrame;
 
+import pixel.input.Keyboard;
+import pixel.input.Mouse;
+
 @SuppressWarnings("serial")
 public abstract class Pixel extends Canvas implements Runnable, ComponentListener {
 	private static volatile Pixel pixelEngine;
@@ -18,6 +21,8 @@ public abstract class Pixel extends Canvas implements Runnable, ComponentListene
 	private Thread mainThread;
 	private JFrame frame;
 
+	private Keyboard keyboard;
+	private Mouse mouse;
 	protected Display display;
 	private BufferStrategy buffer;
 
@@ -78,6 +83,10 @@ public abstract class Pixel extends Canvas implements Runnable, ComponentListene
 	public float getScaleHeight(){
 		return scaleHeight;
 	}
+	
+	public JFrame getFrame(){
+		return frame;
+	}
 
 	/**
 	 * Initialize the game, and starts the main thread.
@@ -109,6 +118,8 @@ public abstract class Pixel extends Canvas implements Runnable, ComponentListene
 			delta += (now - then) / tickSec;
 			then = now;
 			if (delta >= 1.0D) {
+				keyboard.update();
+				mouse.update();
 				updateEngine();
 				renderEngine();
 				delta -= 1.0D;
@@ -118,7 +129,6 @@ public abstract class Pixel extends Canvas implements Runnable, ComponentListene
 
 	private void initEngine() {
 		pixelEngine = this;
-
 		initialize();
 
 		frame.setVisible(true);
@@ -127,6 +137,8 @@ public abstract class Pixel extends Canvas implements Runnable, ComponentListene
 
 		setFocusTraversalKeysEnabled(false);
 		requestFocus();
+		keyboard = Keyboard.getInstance();
+		mouse = Mouse.getInstance();
 	}
 
 	private void updateEngine() {
