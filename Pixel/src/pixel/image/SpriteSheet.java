@@ -44,6 +44,10 @@ public class SpriteSheet {
 		return pixels;
 	}
 
+	public Sprite createSprite(String name, int x, int y, int width, int height) {
+		return createSprite(name, x, y, width, height, 0xFF00FF);
+	}
+	
 	public Sprite createSprite(String name, int x, int y, int width, int height, int transparentColour) {
 		int[] sPixels = new int[width * height];
 		int w2 = width + x;
