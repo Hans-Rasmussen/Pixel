@@ -15,7 +15,7 @@ import pixel.input.Mouse;
 
 @SuppressWarnings("serial")
 public abstract class Pixel extends Canvas implements Runnable, ComponentListener {
-	private static volatile Pixel pixelEngine;
+	private static volatile Pixel pixel;
 
 	private String title;
 	private Thread mainThread;
@@ -27,12 +27,14 @@ public abstract class Pixel extends Canvas implements Runnable, ComponentListene
 	private BufferStrategy buffer;
 
 	private boolean running;
+	private int width, height;
 	private float scaleWidth, scaleHeight;
 	private int ticks, update;
+	private int targetUpdates;
 
 	/**
-	 * PixelEngine constructor should only be used for creating the frame, use
-	 * initialize() anything else.
+	 * Pixel constructor should only be used for creating the frame, use
+	 * initialize() for anything else.
 	 * 
 	 * @see Pixel#initialize()
 	 * 
@@ -42,13 +44,24 @@ public abstract class Pixel extends Canvas implements Runnable, ComponentListene
 	 *            of the canvas the game is drawn to
 	 * @param height
 	 *            of the canvas the game is drawn to
+	 * @param targetUpdates
+	 *            is the updates/sec
 	 */
-	public Pixel(String title, int width, int height) {
+	public Pixel(String title, int width, int height, int targetUpdates) {
+		if (width <= 0 || height <= 0 || targetUpdates <= 0) {
+			throw new RuntimeException("Invalid params");
+		}
 		this.title = title;
+		this.width = width;
+		this.height = height;
+		this.targetUpdates = targetUpdates;
 		display = new Display(width, height);
-		createFrame();
+		
 	}
 
+	/**
+	 * Create and setup the JFrame.
+	 */
 	private void createFrame() {
 		setPreferredSize(new Dimension(display.getWidth(), display.getHeight()));
 
@@ -61,30 +74,70 @@ public abstract class Pixel extends Canvas implements Runnable, ComponentListene
 		frame.addComponentListener(this);
 	}
 
+	/**
+	 * 
+	 * @return The current Pixel Instance.
+	 */
 	public static Pixel getInstance() {
-		if (pixelEngine == null) {
+		if (pixel == null) {
 			throw new RuntimeException("PixelEngine not initialized");
 		}
-		return pixelEngine;
+		return pixel;
 	}
 
+	/**
+	 * 
+	 * @return The total amount of ticks since Pixel main thread started.
+	 */
 	public int getTotalTicks() {
 		return ticks;
 	}
 
+	/**
+	 * 
+	 * @return The tick of the current update cycle.
+	 */
 	public int getCurrentTick() {
 		return update;
 	}
-	
-	public float getScaleWidth(){
+
+	/**
+	 * returns the <code>width</code> of the canvas in which Pixel draws on.
+	 */
+	public int getCanvasWidth() {
+		return width;
+	}
+
+	/**
+	 * returns the height of the canvas in which Pixel draws on.
+	 */
+	public int getCanvasHeight() {
+		return height;
+	}
+
+	/**
+	 * Whenever the window size change, the width scale is updated.
+	 * 
+	 * @return The current scale for width.
+	 */
+	public float getScaleWidth() {
 		return scaleWidth;
 	}
-	
-	public float getScaleHeight(){
+
+	/**
+	 * Whenever the window size change, the height scale is updated.
+	 * 
+	 * @return The current scale for height.
+	 */
+	public float getScaleHeight() {
 		return scaleHeight;
 	}
-	
-	public JFrame getFrame(){
+
+	/**
+	 * 
+	 * @return The active JFrame in which the game is running.
+	 */
+	public JFrame getFrame() {
 		return frame;
 	}
 
@@ -93,14 +146,15 @@ public abstract class Pixel extends Canvas implements Runnable, ComponentListene
 	 */
 	public void start() {
 		if (!running) {
-			initEngine();
+			createFrame();
+			initPixel();
 			mainThread = new Thread(this);
 			mainThread.start();
 		}
 	}
 
 	/**
-	 * Tells the engine to close upon ending it's cycle.
+	 * Stops the main thread.
 	 */
 	public void stop() {
 		running = false;
@@ -112,23 +166,26 @@ public abstract class Pixel extends Canvas implements Runnable, ComponentListene
 		long now = 0L;
 		long then = System.nanoTime();
 		double delta = 0.0D;
-		double tickSec = 1E9D/60D;
+		double tickSec = 1E9D / targetUpdates;
 		while (running) {
 			now = System.nanoTime();
 			delta += (now - then) / tickSec;
 			then = now;
 			if (delta >= 1.0D) {
-				keyboard.update();
-				mouse.update();
-				updateEngine();
-				renderEngine();
+				updateInput();
+				updatePixel();
+				renderPixel();
 				delta -= 1.0D;
 			}
 		}
+		frame.dispose();
 	}
 
-	private void initEngine() {
-		pixelEngine = this;
+	/**
+	 * Called once when the method start() is used.
+	 */
+	private void initPixel() {
+		pixel = this;
 		initialize();
 
 		frame.setVisible(true);
@@ -141,20 +198,26 @@ public abstract class Pixel extends Canvas implements Runnable, ComponentListene
 		mouse = Mouse.getInstance();
 	}
 
-	private void updateEngine() {
+	/**
+	 * Updates both the state of the keyboard and mouse input.
+	 */
+	private void updateInput() {
+		keyboard.update();
+		mouse.update();
+	}
+
+	private void updatePixel() {
 		{
 			update();
 		}
 		ticks++;
-		update = (update + 1) % 60;
+		update = (update + 1) % targetUpdates;
 	}
 
-	private void renderEngine() {
-	
+	private void renderPixel() {
 		{
 			render();
 		}
-
 		Graphics g = buffer.getDrawGraphics();
 		g.drawImage(display.getImage(), 0, 0, getWidth(), getHeight(), null);
 		g.dispose();
