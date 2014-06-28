@@ -7,21 +7,16 @@ public class Screen {
 	private static int[] pixels;
 	private static int displayWidth, displayHeight;
 
-	static {
-		Display d = Pixel.getInstance().display;
-		pixels = d.getPixels();
-		displayWidth = d.getWidth();
-		displayHeight = d.getHeight();
-	}
-
 	private int screenX, screenY;
 	private int screenW0, screenH0, screenW1, screenH1;
 
-	public Screen() {
-		this(0, 0, displayWidth, displayHeight);
-	}
-
-	public Screen(int x, int y, int width, int height) {
+	protected Screen(int x, int y, int width, int height) {
+		if(pixels == null){
+			Display d = Pixel.getInstance().getDisplay();
+			displayWidth = d.getDisplayWidth();
+			displayHeight = d.getDisplayHeight();
+			pixels = d.getPixels();
+		}
 		this.screenX = x;
 		this.screenY = y;
 		this.screenW0 = width;
@@ -50,7 +45,7 @@ public class Screen {
 		}
 	}
 
-	public void drawArea(int x, int y, int width, int height, int colour) {
+	public void fillArea(int x, int y, int width, int height, int colour) {
 
 		// Evaluate x and width
 		x += screenX;

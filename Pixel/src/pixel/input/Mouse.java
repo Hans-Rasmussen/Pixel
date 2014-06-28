@@ -25,9 +25,9 @@ public class Mouse extends MouseAdapter {
 	private static Queue<MouseEvent> buttonsOld = new ArrayBlockingQueue<>(32);
 
 	private Mouse() {
-		Pixel.getInstance().addMouseListener(this);
-		Pixel.getInstance().addMouseWheelListener(this);
-		Pixel.getInstance().addMouseMotionListener(this);
+		Pixel.getInstance().getDisplay().addMouseListener(this);
+		Pixel.getInstance().getDisplay().addMouseWheelListener(this);
+		Pixel.getInstance().getDisplay().addMouseMotionListener(this);
 	}
 
 	public static Mouse getInstance() {
@@ -151,7 +151,7 @@ public class Mouse extends MouseAdapter {
 	}
 
 	private void updateMouseCoord(float x, float y) {
-		xNew = (Pixel.getInstance().getScaleWidth() * x);
-		yNew = (Pixel.getInstance().getScaleHeight() * y);
+		xNew = (Pixel.getInstance().getDisplay().getScaleWidth() * x);
+		yNew = (Pixel.getInstance().getDisplay().getScaleHeight() * y);
 	}
 }

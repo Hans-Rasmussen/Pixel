@@ -20,7 +20,7 @@ public class Keyboard extends KeyAdapter {
 	private static Queue<KeyEvent> keysOld = new ArrayBlockingQueue<>(32);
 
 	private Keyboard() {
-		Pixel.getInstance().addKeyListener(this);
+		Pixel.getInstance().getDisplay().addKeyListener(this);
 	}
 
 	public static Keyboard getInstance() {
